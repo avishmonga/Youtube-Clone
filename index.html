@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://kit.fontawesome.com/35fa5e204f.js" crossorigin="anonymous"></script>
+
+    <title>Document</title>
+  </head>
+
+  <style>
+    #search_results {
+      display: grid;
+      width: 100%;
+      grid-template-columns: repeat(4,auto);
+      grid-gap: 2%;
+
+      justify-content: space-between;
+      margin-top: 5%;
+    }
+    #search_results div{
+      /* width: 20%; */
+      text-align: justify;
+    }
+    #nav{
+      display: flex;
+      justify-content: space-between;
+
+
+    }
+    #nav img{
+      margin-top: 15px;
+      height: 40px;
+    }
+    #nav input{
+      height: 30px;
+      width: 500px;
+    }
+    #searchbar{
+      margin-top: 20px;
+      width: 40%;
+      display: flex;
+      justify-content: space-between;
+    }
+    #searchbar i{
+      font-size: 30px;
+    }
+
+    #icons{
+      display: flex;
+      width: 15%;
+      justify-content: space-between;
+    }
+    #icons i{
+      margin-top: 20px;
+      font-size: 30px;
+    }
+    
+  </style>
+
+  <body>
+
+    <div id="nav">
+
+      <img src="https://www.nicepng.com/png/detail/2-25582_youtube-logo-png-transparent-background-download-youtube-logo.png"/>
+
+      
+
+      <div id="searchbar">
+        <input type="text" id="search" />
+        <i onclick="searchVideos()" class="fas fa-search"></i>
+      </div>
+
+      <div id="icons">
+        <i class="fas fa-video"></i>
+        <i class="far fa-bell"></i>
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="">
+      </div>
+
+    </div>
+
+    
+
+    <div id="search_results"></div>
+  </body>
+</html>
+
+
+<script>
+
+    let api = "AIzaSyA5yBU5UEasTND8HZCErkYYVMHRDWVK_wc"
+popularVideos()
+   async function popularVideos(){
+     let resp = await fetch (`https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&chart=mostPopular&regionCode=IN&key=${api}&maxResults=20&type=video`);
+     let data = await resp.json();
+     let array_of_videos = data.items;
+     console.log(array_of_videos)
+     appendVideos(array_of_videos)
+    }
+
+let search_results_div = document.getElementById("search_results");
+
+async function searchVideos() {
+  try {
+    let inp = document.getElementById("search").value;
+    search_results_div.innerHTML = null;
+
+
+
+    let res = await fetch(
+      `https://youtube.googleapis.com/youtube/v3/search?q=${inp}&key=${api}&type=video&maxResults=20&part=snippet`
+    );
+
+    let data = await res.json();
+    console.log("data:", data);
+
+    let array_of_videos = data.items;
+    console.log(array_of_videos)
+
+appendVideos(array_of_videos);
+  } catch (err) {
+    console.log("err:", err);
+  }
+}
+
+const appendVideos = (arr) => {
+  arr.forEach(({snippet, id: { videoId } }) => {
+    let url = snippet.thumbnails.medium.url
+    let title = snippet.title
+    // console.log("snippet:", url);
+
+    let div = document.createElement("div");
+
+    let img = document.createElement("img");
+    img.src = url;
+    let h3 = document.createElement("h3");
+    h3.textContent = title;
+    let video_data ={
+      snippet,
+      videoId
+    }
+  
+  div.onclick = ()=>{
+    showvideo(video_data);
+  }
+
+    div.append(img,h3);
+
+    search_results_div.append(div);
+  });
+};
+
+ const showvideo = (video_data)=>{
+//  console.log("video_data" , video_data)
+
+localStorage.setItem("clicked_video",JSON.stringify(video_data))
+window.open("video.html");
+};
+</script>
